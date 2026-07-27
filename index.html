@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纳古国学日历 | 知天时 · 明地理 · 顺自身</title>
+    <script src="https://fastly.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 现代清爽系统字体 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f7f4ed;
+            color: #333333;
+            line-height: 1.6;
+            padding-bottom: 90px;
+        }
+
+        /* 顶部 Header */
+        .header {
+            background: linear-gradient(180deg, #801b22 0%, #681218 100%);
+            color: #fcecdb;
+            text-align: center;
+            padding: 28px 15px 35px 15px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(128, 27, 34, 0.2);
+        }
+
+        .header-logo-box {
+            width: 90px;
+            height: 90px;
+            background: #ffffff;
+            padding: 6px;
+            border-radius: 14px;
+            margin: 0 auto 12px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+
+        /* 内容容器 */
+        .container {
+            max-width: 480px;
+            margin: -15px auto 20px auto;
+            padding: 0 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 卡片通用 */
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(128, 27, 34, 0.05);
+            border: 1px solid rgba(128, 27, 34, 0.08);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #801b22;
+            border-left: 4px solid #801b22;
+            padding-left: 10px;
+            margin-bottom: 16px;
+        }
+
+        /* 日期面板 */
+        .date-section {
+            text-align: center;
+            border-bottom: 1px dashed #e8e1d7;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        .solar-date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .lunar-date {
+            font-size: 26px;
+            font-weight: bold;
+            color: #801b22;
+            margin-bottom: 8px;
+        }
+
+        .ganzhi-tag {
+            display: inline-block;
+            background-color: #fdf5ea;
+            color: #b37324;
+            border: 1px solid #f3e2c8;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* 新增：黄历宜忌样式 */
+        .yiji-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed #e8e1d7;
+        }
+
+        .yiji-box {
+            flex: 1;
+            background: #faf7f2;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            border: 1px solid #f0e6d8;
+        }
+
+        .yi-badge {
+            background-color: #801b22;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .ji-badge {
+            background-color: #555555;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .yiji-text {
+            font-size: 12px;
+            color: #444;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        /* 五行穿衣表格 */
+        .dress-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .dress-table td {
+            padding: 8px 0;
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        .label-cell {
+            width: 60px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .tag-cell {
+            width: 70px;
+        }
+
+        .element-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            text-align: center;
+            width: 58px;
+        }
+
+        .bg-daji { background-color: #e2614d; }
+        .bg-ciji { background-color: #e5a443; }
+        .bg-buyi { background-color: #5baec6; }
+
+        .color-desc {
+            color: #555;
+            padding-left: 4px;
+        }
+
+        /* 今日择日心语 - 三维度 */
+        .insight-box {
+            background-color: #faf7f2;
+            border: 1px solid #f0e6d8;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+
+        .insight-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #801b22;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .insight-desc {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* 业务矩阵 */
+        .service-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .service-item {
+            background: #faf7f2;
+            border: 1px solid #f0e6d8;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .service-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .service-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #801b22;
+            margin-bottom: 2px;
+        }
+
+        .service-desc {
+            font-size: 11px;
+            color: #777;
+        }
+
+        /* 导师简介 */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .avatar {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #801b22;
+            margin-right: 14px;
+            background-color: #eee;
+            flex-shrink: 0;
+        }
+
+        .profile-info h3 {
+            font-size: 16px;
+            color: #801b22;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .profile-desc-box {
+            background-color: #faf7f2;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .highlight-text {
+            color: #801b22;
+            font-weight: bold;
+        }
+
+        /* 底部按钮 */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            padding: 12px 18px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-consult {
+            width: 100%;
+            max-width: 440px;
+            background: linear-gradient(135deg, #a3262e, #801b22);
+            color: #ffffff;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(128, 27, 34, 0.3);
+            text-align: center;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 320px;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            animation: modalFadeIn 0.25s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.88); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #801b22;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 14px;
+        }
+
+        .qr-image {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            margin: 0 auto 14px auto;
+            display: block;
+        }
+
+        .modal-tag {
+            color: #801b22;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .modal-desc {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-logo-box">
+            <img src="纳古字体抠图.jpeg" alt="纳古 Logo" onerror="this.style.display='none'">
+        </div>
+        <h1>纳古国学日历</h1>
+        <p>知天时 · 明地理 · 顺自身</p>
+    </header>
+
+    <main class="container">
+
+        <section class="card">
+            <div class="date-section">
+                <div class="solar-date" id="solar-date">2026年 --月--日 星期--</div>
+                <div class="lunar-date" id="lunar-date">农历 加载中...</div>
+                <div class="ganzhi-tag" id="ganzhi-date">--年 --月 --日</div>
+            </div>
+
+            <div class="yiji-container">
+                <div class="yiji-box">
+                    <span class="yi-badge">宜</span>
+                    <span class="yiji-text" id="yi-text">加载中...</span>
+                </div>
+                <div class="yiji-box">
+                    <span class="ji-badge">忌</span>
+                    <span class="yiji-text" id="ji-text">加载中...</span>
+                </div>
+            </div>
+
+            <div class="card-title">每日五行穿衣</div>
+            <table class="dress-table">
+                <tr>
+                    <td class="label-cell">大吉色：</td>
+                    <td class="tag-cell"><span class="element-label bg-daji">生我者</span></td>
+                    <td class="color-desc" id="dress-best">正在计算...</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">次吉色：</td>
+                    <td class="tag-cell"><span class="element-label bg-ciji">同我者</span></td>
+                    <td class="color-desc" id="dress-good">正在计算...</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">不宜色：</td>
+                    <td class="tag-cell"><span class="element-label bg-buyi">克我者</span></td>
+                    <td class="color-desc" id="dress-avoid">正在计算...</td>
+                </tr>
+            </table>
+        </section>
+
+        <section class="card">
+            <div class="card-title">今日择日心语 · 三维灵感</div>
+            
+            <div class="insight-box">
+                <div class="insight-title">🍃 生活上 · 顺时养生</div>
+                <div class="insight-desc">宜品茗静心，整理居家环境。保持节奏松弛，顺应自然磁场流通，不急不躁，正能量自会充盈。</div>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-title">💼 工作中 · 定力突破</div>
+                <div class="insight-desc">面对繁杂事务需保持如“乙木”般的柔韧与定力，锁定核心目标全速推进，必有所获。</div>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-title">❤️ 情感上 · 温润包容</div>
+                <div class="insight-desc">宜双向奔赴。少一分固执，多一分倾听。温润的言语最能滋养关系，让爱在包容中升温。</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-title">纳古服务 · 布局与开运</div>
+            <div class="service-grid">
+                <div class="service-item">
+                    <span class="service-icon">🔮</span>
+                    <div class="service-name">八字精算</div>
+                    <div class="service-desc">流年运势 / 事业婚姻指引</div>
+                </div>
+                <div class="service-item">
+                    <span class="service-icon">☯️</span>
+                    <div class="service-name">风水堪舆</div>
+                    <div class="service-desc">住宅办公布局 / 催旺文昌财官</div>
+                </div>
+                <div class="service-item">
+                    <span class="service-icon">📖</span>
+                    <div class="service-name">易经讲堂</div>
+                    <div class="service-desc">零基础入门课 / 术数实战教学</div>
+                </div>
+                <div class="service-item">
+                    <span class="service-icon">📿</span>
+                    <div class="service-name">纳古文创</div>
+                    <div class="service-desc">定制助运手办 / 避邪化煞精品</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="profile-header">
+                <img src="人物抠图2.png" alt="纳古导师" class="avatar" onerror="this.src='https://via.placeholder.com/68?text=导师'">
+                <div class="profile-info">
+                    <h3>纳古国学 · 亲授导师</h3>
+                    <p>传统文化传播者 | 易学应用专家</p>
+                </div>
+            </div>
+
+            <div class="profile-desc-box">
+                <span class="highlight-text">【导师寄语】</span> 顺应天时，因势利导。将深奥的国学智慧融合进现代日常生活与课业指导中。帮助每一位学子与家庭<span class="highlight-text">“知命而不宿命，顺势而为”</span>。提供个人定制流年建议及国学实战指导。
+            </div>
+        </section>
+
+    </main>
+
+    <div class="bottom-bar">
+        <button class="btn-consult" onclick="openModal()">💬 点击咨询 · 联系纳古馆主</button>
+    </div>
+
+    <div class="modal-overlay" id="qrModal" onclick="closeModalOnBg(event)">
+        <div class="modal-card">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-title">纳古国学 · 馆主微信</div>
+            <div class="modal-subtitle">长按识别或扫码，添加微信好友</div>
+            <img src="个人二维码.jpg" alt="馆主微信二维码" class="qr-image" onerror="if(this.src.indexOf('qrcode.jpg')===-1) this.src='qrcode.jpg';">
+            <div class="modal-tag">【专属一对一服务】</div>
+            <div class="modal-desc">八字命理 | 阳宅风水 | 易经课程 | 助运手办</div>
+        </div>
+    </div>
+
+    <script>
+        // 自动计算公历、农历、黄历宜忌与五行穿衣
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                const now = new Date();
+                const solar = Solar.fromDate(now);
+                const lunar = solar.getLunar();
+                const weekNames = ["日", "一", "二", "三", "四", "五", "六"];
+
+                document.getElementById("solar-date").innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${weekNames[now.getDay()]}`;
+                document.getElementById("lunar-date").innerText = `农历 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+                document.getElementById("ganzhi-date").innerText = `${lunar.getYearInGanZhi()}年【${lunar.getYearShengXiao()}】 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`;
+
+                // 黄历宜忌计算
+                const yiList = lunar.getDayYi();
+                const jiList = lunar.getDayJi();
+                document.getElementById("yi-text").innerText = yiList && yiList.length ? yiList.slice(0, 5).join(' · ') : '祈福 祭祀 交易 出行';
+                document.getElementById("ji-text").innerText = jiList && jiList.length ? jiList.slice(0, 5).join(' · ') : '动土 词讼 安葬 开仓';
+
+                // 五行穿衣计算
+                const wuxingColors = {
+                    "金": "白色、金色、杏色", 
+                    "木": "青色、绿色、翡翠色", 
+                    "水": "黑色、蓝色、灰色", 
+                    "火": "红色、紫色、粉色", 
+                    "土": "黄色、咖啡色、棕色"
+                };
+                const gan = lunar.getDayGan();
+                let dayWx = "土";
+                if(["甲","乙"].includes(gan)) dayWx = "木";
+                else if(["丙","丁"].includes(gan)) dayWx = "火";
+                else if(["庚","辛"].includes(gan)) dayWx = "金";
+                else if(["壬","癸"].includes(gan)) dayWx = "水";
+
+                const shengMe = { "金": "土", "木": "水", "水": "金", "火": "木", "土": "火" }[dayWx];
+                const keMe = { "金": "火", "木": "金", "水": "土", "火": "水", "土": "木" }[dayWx];
+
+                document.getElementById("dress-best").innerText = wuxingColors[shengMe] + "（大吉）";
+                document.getElementById("dress-good").innerText = wuxingColors[dayWx] + "（次吉）";
+                document.getElementById("dress-avoid").innerText = wuxingColors[keMe] + "（不宜）";
+            } catch(e) { 
+                console.error("日历加载异常:", e); 
+            }
+        });
+
+        function openModal() {
+            document.getElementById('qrModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('qrModal').classList.remove('active');
+        }
+
+        function closeModalOnBg(event) {
+            if (event.target.id === 'qrModal') {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
