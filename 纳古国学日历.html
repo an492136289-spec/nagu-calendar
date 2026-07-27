@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纳吉国学日历 | 知天时 · 明地理 · 顺自身</title>
+    <script src="https://fastly.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+    <style>
+        :root {
+            --bg-color: #fcf8f2;
+            --primary-red: #8c222c;
+            --accent-bronze: #b8860b;
+            --accent-green: #3b5a6b;
+            --text-main: #333333;
+            --text-gold: #b8860b;
+            --card-bg: #ffffff;
+            --font-family-guofeng: "PingFang SC", "Microsoft YaHei", "SimSun", serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path d="M50 0 C60 0 70 10 70 20 L70 30 C70 40 60 50 50 50 C40 50 30 40 30 30 L30 20 C30 10 40 0 50 0 Z M50 60 C60 60 70 70 70 80 L70 90 C70 100 60 110 50 110 C40 110 30 100 30 90 L30 80 C30 70 40 60 50 60 Z" fill="none" stroke="%23ebdccb" stroke-width="1"/></svg>');
+            font-family: var(--font-family-guofeng);
+            color: var(--text-main);
+            padding-bottom: 90px;
+        }
+
+        .na-header {
+            background: linear-gradient(180deg, var(--primary-red) 0%, #6a1921 100%);
+            color: #fff;
+            text-align: center;
+            padding: 24px 16px 20px;
+            box-shadow: 0 4px 12px rgba(140, 34, 44, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .na-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10" opacity="0.3"><path d="M0 0 Q50 20 100 0 L100 10 L0 10 Z" fill="%23fcf8f2"/></svg>');
+            background-repeat: repeat-x;
+        }
+
+        .na-logo-container {
+            width: 110px;
+            margin: 0 auto 12px;
+            background: #fff;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+        }
+        .na-logo-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .na-header h1 { margin: 0; font-size: 20px; letter-spacing: 3px; font-weight: normal; font-family: "SimSun", serif; }
+        .na-header p { margin: 6px 0 0; font-size: 12px; opacity: 0.85; letter-spacing: 1px; }
+        
+        .container { padding: 16px; max-width: 480px; margin: 0 auto; }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            border: 1px solid #efe8dd;
+            position: relative;
+        }
+        .card-title {
+            font-size: 16px;
+            color: var(--primary-red);
+            border-left: 4px solid var(--primary-red);
+            padding-left: 10px;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+        
+        .date-box { 
+            text-align: center; 
+            padding: 10px 0; 
+            border-bottom: 1px dashed #eee; 
+            margin-bottom: 15px; 
+            position: relative;
+        }
+        .date-box::before {
+            content: '『日签』';
+            position: absolute;
+            top: -10px;
+            right: 0px;
+            font-size: 11px;
+            color: #eee;
+            opacity: 0.6;
+            font-family: serif;
+        }
+
+        .gregorian { font-size: 16px; color: #666; margin-bottom: 5px; }
+        .lunar-large { font-size: 26px; color: var(--primary-red); font-weight: bold; margin: 8px 0; font-family: "SimSun", serif;}
+        .ganzhi { font-size: 16px; color: var(--accent-bronze); background: #fdfaf5; display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid #f5ebd8;}
+
+        .color-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; }
+        .color-label { width: 65px; font-weight: bold; color: var(--text-main); }
+        .tag { padding: 4px 10px; border-radius: 6px; font-size: 13px; margin-right: 8px; color: #fff;}
+        .tag-good { background-color: #d9534f; }
+        .tag-ok { background-color: #f0ad4e; }
+        .tag-bad { background-color: #5bc0de; }
+        .tag-text { color: #555; }
+
+        .yiji-box { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 14px; 
+            border: 1px solid #efe8dd; 
+            border-radius: 8px;
+            padding: 12px;
+            background: #fdfbf7;
+        }
+        .yiji-col { width: 48%; }
+        .yi-icon { color: #d9534f; font-weight: bold; text-align: center; margin-bottom: 8px; }
+        .ji-icon { color: var(--accent-green); font-weight: bold; text-align: center; margin-bottom: 8px; }
+        .yiji-list { color: #666; line-height: 1.6; margin-top: 4px; text-align: center; padding: 0 5px;}
+
+        .teacher-section { 
+            text-align: center; 
+            background: linear-gradient(135deg, #fff 0%, #fdfbf7 100%); 
+            border: 1px solid #ebdccb; 
+            padding: 24px 16px;
+        }
+        .teacher-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .na-avatar-container { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 50%; 
+            border: 3px solid var(--primary-red); 
+            margin-right: 15px;
+            background: #eee; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(140, 34, 44, 0.15);
+            flex-shrink: 0;
+        }
+        .na-avatar-container::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            border: 1px solid #ebdccb;
+            opacity: 0.5;
+        }
+        .na-avatar-container img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        
+        .teacher-intro-text { text-align: left; }
+        .teacher-name { font-size: 19px; font-weight: bold; color: var(--primary-red); margin: 0 0 4px; }
+        .teacher-title { font-size: 13px; color: #888; }
+        
+        .teacher-desc-details { font-size: 13px; color: #555; text-align: left; line-height: 1.8; background: #fff; padding: 16px; border-radius: 8px; border: 1px dashed #efe8dd; }
+        .highlight-desc { color: var(--primary-red); font-weight: bold; }
+        .accent-desc { color: var(--accent-bronze); font-weight: bold; }
+
+        .footer-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+        .btn-cta {
+            background: linear-gradient(90deg, var(--primary-red) 0%, #d9534f 100%);
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            padding: 14px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 4px 10px rgba(140, 34, 44, 0.3);
+            transition: all 0.2s ease-out;
+        }
+        .btn-cta:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 6px rgba(140, 34, 44, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="na-header">
+        <div class="na-logo-container">
+            <img id="logo-img" src="纳古字体抠图.jpeg" alt="纳吉国学">
+        </div>
+        <h1>纳吉国学日历</h1>
+        <p>知天时 · 明地理 · 顺自身</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="date-box">
+                <div class="gregorian" id="gregorian-date">2026年 --月--日 星期--</div>
+                <div class="lunar-large" id="lunar-date">农历 加载中...</div>
+                <div class="ganzhi" id="ganzhi-date">--年 --月 --日</div>
+            </div>
+
+            <div class="card-title">每日五行穿衣</div>
+            <div class="color-row">
+                <span class="color-label">大吉色：</span>
+                <span class="tag tag-good">生我者</span>
+                <span class="tag-text" id="dress-good">正在计算今日吉色...</span>
+            </div>
+            <div class="color-row">
+                <span class="color-label">次吉色：</span>
+                <span class="tag tag-ok">同我者</span>
+                <span class="tag-text" id="dress-ok">正在计算...</span>
+            </div>
+            <div class="color-row">
+                <span class="color-label">不宜色：</span>
+                <span class="tag tag-bad">克我者</span>
+                <span class="tag-text" id="dress-bad">正在计算...</span>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div class="card-title">每日宜忌</div>
+                <div class="yiji-box">
+                    <div class="yiji-col">
+                        <div class="yi-icon">【 宜 】</div>
+                        <div class="yiji-list" id="yi-list">祈福 纳财 开市 交易</div>
+                    </div>
+                    <div class="yiji-col" style="border-left: 1px dashed #efe8dd;">
+                        <div class="ji-icon">【 忌 】</div>
+                        <div class="yiji-list" id="ji-list">动土 破土 探病 动工</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card teacher-section">
+            <div class="teacher-header">
+                <div class="na-avatar-container">
+                    <img id="teacher-img" src="人物抠图2.png" alt="国学导师">
+                </div>
+                <div class="teacher-intro-text">
+                    <div class="teacher-name">纳吉国学 · 亲授导师</div>
+                    <div class="teacher-title">传统文化传播者 | 易学应用专家</div>
+                </div>
+            </div>
+            <div class="teacher-desc-details">
+                <span class="highlight-desc">【教育理念】</span> 顺应天时，因势利导。将深奥的国学智慧融合进现代日常生活与课业指导中。<br><br>
+                <span class="accent-desc">【专长领域】</span> 精通传统排盘原理与流年流月运势分析，致力于帮助广大学子及家庭<span class="highlight-desc">“知命而不宿命，顺势而为”</span>。
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-cta">
+        <a href="javascript:alert('欢迎联系纳吉国学！在此处可以链接到您的课程网页或微信客服');" class="btn-cta">点击咨询 · 获取个人定制流年建议</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                const now = new Date();
+                const solar = Solar.fromDate(now);
+                const lunar = solar.getLunar();
+
+                const weekNames = ["日", "一", "二", "三", "四", "五", "六"];
+                document.getElementById("gregorian-date").innerText = 
+                    `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${weekNames[now.getDay()]}`;
+
+                document.getElementById("lunar-date").innerText = 
+                    `农历 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+
+                document.getElementById("ganzhi-date").innerText = 
+                    `${lunar.getYearInGanZhi()}年 【${lunar.getYearShengXiao()}】 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`;
+
+                const yi = lunar.getDayYi();
+                const ji = lunar.getDayJi();
+                document.getElementById("yi-list").innerText = yi.length > 0 ? yi.slice(0, 6).join(" / ") : "诸事皆宜";
+                document.getElementById("ji-list").innerText = ji.length > 0 ? ji.slice(0, 6).join(" / ") : "无特别禁忌";
+
+                const wuxingColors = {
+                    "金": { name: "白色、杏色、金色", desc: "属金之色" },
+                    "木": { name: "青色、绿色、翡翠色", desc: "属木之色" },
+                    "水": { name: "黑色、蓝色、灰色", desc: "属水之色" },
+                    "火": { name: "红色、紫色、粉色", desc: "属火之色" },
+                    "土": { name: "黄色、棕色、咖色", desc: "属土之色" }
+                };
+
+                const gan = lunar.getDayGan();
+                let dayWuxing = "土";
+                if(["甲","乙"].includes(gan)) dayWuxing = "木";
+                if(["丙","丁"].includes(gan)) dayWuxing = "火";
+                if(["戊","己"].includes(gan)) dayWuxing = "土";
+                if(["庚","辛"].includes(gan)) dayWuxing = "金";
+                if(["壬","癸"].includes(gan)) dayWuxing = "水";
+
+                const shengMe = { "金": "土", "木": "水", "水": "金", "火": "木", "土": "火" }[dayWuxing];
+                const keMe = { "金": "火", "木": "金", "水": "土", "火": "水", "土": "木" }[dayWuxing];
+
+                document.getElementById("dress-good").innerText = `${wuxingColors[shengMe].name} (${shengMe}生${dayWuxing}大旺)`;
+                document.getElementById("dress-ok").innerText = `${wuxingColors[dayWuxing].name} (与今日五行相同)`;
+                document.getElementById("dress-bad").innerText = `${wuxingColors[keMe].name} (被今日五行所克，尽量避免)`;
+
+            } catch(e) {
+                console.error("日历脚本运行出错:", e);
+            }
+        });
+    </script>
+</body>
+</html>
